@@ -1,18 +1,19 @@
-import { Module } from "@nestjs/common";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { PagesService } from "./pages.service";
-import { PagesController } from "./pages.controller";
-import { PublicController } from "./public.controller";
-import { Page } from "./entities/page.entity";
-import { LinksModule } from "../links/links.module";
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Page } from './page.entity';
+import { Link } from './link.entity';
+import { SocialLink } from './social-link.entity';
+import { PageStyle } from './page-style.entity';
+import { PagesService } from './pages.service';
+import { PagesController } from './pages.controller';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Page]),
-    LinksModule, // Importar LinksModule para usar LinksService
+    TypeOrmModule.forFeature([Page, Link, SocialLink, PageStyle]),
+    UsersModule,
   ],
-  controllers: [PagesController, PublicController],
   providers: [PagesService],
-  exports: [PagesService],
+  controllers: [PagesController],
 })
 export class PagesModule {}

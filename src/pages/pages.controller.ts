@@ -1,114 +1,54 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Put,
-  Delete,
-  Body,
   Param,
+  Post,
   UseGuards,
-  Request,
-  Query,
-  ParseUUIDPipe,
-} from "@nestjs/common";
-import { PagesService } from "./pages.service";
-import { CreatePageDto } from "./dtos/create-page.dto";
-import { UpdatePageDto } from "./dtos/update-page.dto";
-import { PageStatsQueryDto } from "./dtos/page-stats-query.dto";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
-import { Page } from "./entities/page.entity";
+  Req,
+  Patch,
+  Delete,
+} from '@nestjs/common';
+import { PagesService } from './pages.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreatePageDto } from './dto/create-page.dto';
+import { UpdatePageDto } from './dto/update-page.dto';
 
-@Controller("pages")
-@UseGuards(JwtAuthGuard)
+@Controller('pages')
 export class PagesController {
-  constructor(private readonly pagesService: PagesService) {}
+  constructor(private pagesService: PagesService) {}
 
+  // Criar página (auth)
+  @UseGuards(JwtAuthGuard)
   @Post()
-  async create(
-    @Body() createPageDto: CreatePageDto,
-    @Request() req
-  ): Promise<Page> {
-    return this.pagesService.create(createPageDto, req.user.id);
+  create(@Req() req: any, @Body() dto: CreatePageDto) {
+    return this.pagesService.create(req.user.userId, dto);
   }
 
-  @Get()
-  async findAll(@Request() req): Promise<Page[]> {
-    return this.pagesService.findAllByUser(req.user.id);
+  // Listar páginas do usuário logado
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  myPages(@Req() req: any) {
+    return this.pagesService.findAllByUser(req.user.userId);
   }
 
-  @Get("active")
-  async findActive(@Request() req): Promise<Page[]> {
-    return this.pagesService.findActivePagesByUser(req.user.id);
+  // Atualizar página do usuário
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  update(@Req() req: any, @Param('id') id: string, @Body() dto: UpdatePageDto) {
+    return this.pagesService.update(id, req.user.userId, dto);
   }
 
-  @Get("stats")
-  async getStats(
-    @Request() req,
-    @Query() query: PageStatsQueryDto,
-    @Query("pageId") pageId?: string
-  ) {
-    return this.pagesService.getPageStats(req.user.id, pageId);
+  // Remover página
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  remove(@Req() req: any, @Param('id') id: string) {
+    return this.pagesService.remove(id, req.user.userId);
   }
 
-  @Get("search")
-  async search(
-    @Request() req,
-    @Query("q") searchTerm: string
-  ): Promise<Page[]> {
-    if (!searchTerm || searchTerm.trim().length < 2) {
-      return [];
-    }
-    return this.pagesService.searchPages(req.user.id, searchTerm.trim());
-  }
-
-  @Get("validate-permalink/:permalink")
-  async validatePermalink(
-    @Param("permalink") permalink: string,
-    @Request() req
-  ) {
-    return this.pagesService.validatePermalink(permalink, req.user.id);
-  }
-
-  @Get(":id")
-  async findOne(
-    @Param("id", ParseUUIDPipe) id: string,
-    @Request() req
-  ): Promise<Page> {
-    return this.pagesService.findOne(id, req.user.id);
-  }
-
-  @Put(":id")
-  async update(
-    @Param("id", ParseUUIDPipe) id: string,
-    @Body() updatePageDto: UpdatePageDto,
-    @Request() req
-  ): Promise<Page> {
-    return this.pagesService.update(id, updatePageDto, req.user.id);
-  }
-
-  @Delete(":id")
-  async remove(
-    @Param("id", ParseUUIDPipe) id: string,
-    @Request() req
-  ): Promise<void> {
-    return this.pagesService.remove(id, req.user.id);
-  }
-
-  @Post(":id/duplicate")
-  async duplicate(
-    @Param("id", ParseUUIDPipe) id: string,
-    @Request() req
-  ): Promise<Page> {
-    return this.pagesService.duplicatePage(id, req.user.id);
-  }
-
-  @Put(":id/toggle-active")
-  async toggleActive(
-    @Param("id", ParseUUIDPipe) id: string,
-    @Request() req
-  ): Promise<Page> {
-    const page = await this.pagesService.findOne(id, req.user.id);
-    const updateDto: UpdatePageDto = { isActive: !page.isActive };
-    return this.pagesService.update(id, updateDto, req.user.id);
+  // Endpoint público -> usado pelo frontend tipo /:slug (igual ao seu andreitoledo.com.br)
+  @Get('slug/:slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.pagesService.findBySlug(slug);
   }
 }
