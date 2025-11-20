@@ -18,13 +18,16 @@ export class Page {
   id: string;
 
   @Column({ unique: true })
-  slug: string; // ex: "andreitoledo" (url /:slug)
+  slug: string;
 
   @Column()
   title: string;
 
   @Column({ nullable: true })
   description: string;
+
+  @Column({ nullable: true })
+  avatarUrl: string;
 
   @ManyToOne(() => User, (user) => user.pages, { onDelete: 'CASCADE' })
   user: User;

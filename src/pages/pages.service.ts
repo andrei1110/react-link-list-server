@@ -47,13 +47,22 @@ export class PagesService {
   async findBySlug(slug: string) {
     const page = await this.pageRepo.findOne({
       where: { slug },
-      relations: ['user', 'links', 'socialLinks', 'style'],
-      order: {
-        links: { order: 'ASC' },
-        socialLinks: { order: 'ASC' },
-      },
+      relations: ['style', 'links', 'socialLinks'],
     });
-    if (!page) throw new NotFoundException('Page not found');
+
+    if (!page) {
+      throw new NotFoundException('Página não encontrada');
+    }
+
+    // ordenar links por ordem
+    if (page.links) {
+      page.links = page.links.sort((a, b) => a.order - b.order);
+    }
+
+    if (page.socialLinks) {
+      page.socialLinks = page.socialLinks.sort((a, b) => a.order - b.order);
+    }
+
     return page;
   }
 
@@ -75,18 +84,19 @@ export class PagesService {
     if (dto.title !== undefined) page.title = dto.title;
     if (dto.description !== undefined) page.description = dto.description;
     if (dto.slug !== undefined) page.slug = dto.slug;
+    if (dto.avatarUrl !== undefined) page.avatarUrl = dto.avatarUrl;
 
     if (dto.style) {
       Object.assign(page.style, dto.style);
     }
 
     if (dto.links) {
-      await this.linkRepo.delete({ page: { id: page.id } as any });
+      await this.linkRepo.delete({ page: { id: page.id } });
       page.links = dto.links.map((l) => this.linkRepo.create(l));
     }
 
     if (dto.socialLinks) {
-      await this.socialRepo.delete({ page: { id: page.id } as any });
+      await this.socialRepo.delete({ page: { id: page.id } });
       page.socialLinks = dto.socialLinks.map((s) => this.socialRepo.create(s));
     }
 
@@ -100,5 +110,27 @@ export class PagesService {
     if (!page) throw new NotFoundException('Page not found');
     await this.pageRepo.remove(page);
     return { success: true };
+  }
+
+  async findOne(id: string) {
+    const page = await this.pageRepo.findOne({
+      where: { id },
+      relations: ['style', 'links', 'socialLinks'],
+    });
+
+    if (!page) {
+      throw new NotFoundException('Página não encontrada');
+    }
+
+    // ordenar links por ordem
+    if (page.links) {
+      page.links = page.links.sort((a, b) => a.order - b.order);
+    }
+
+    if (page.socialLinks) {
+      page.socialLinks = page.socialLinks.sort((a, b) => a.order - b.order);
+    }
+
+    return page;
   }
 }

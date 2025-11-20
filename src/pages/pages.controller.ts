@@ -13,42 +13,71 @@ import { PagesService } from './pages.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreatePageDto } from './dto/create-page.dto';
 import { UpdatePageDto } from './dto/update-page.dto';
+import type { Req as ReqType } from 'src/types/req';
 
 @Controller('pages')
 export class PagesController {
   constructor(private pagesService: PagesService) {}
 
-  // Criar página (auth)
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Req() req: any, @Body() dto: CreatePageDto) {
-    return this.pagesService.create(req.user.userId, dto);
+  async create(@Req() req: ReqType, @Body() dto: CreatePageDto) {
+    return {
+      success: true,
+      data: await this.pagesService.create(req.user.userId, dto),
+      message: 'Page created',
+    };
   }
 
-  // Listar páginas do usuário logado
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  myPages(@Req() req: any) {
-    return this.pagesService.findAllByUser(req.user.userId);
+  async myPages(@Req() req: ReqType) {
+    return {
+      success: true,
+      data: await this.pagesService.findAllByUser(req.user.userId),
+      message: 'User pages success found',
+    };
   }
 
-  // Atualizar página do usuário
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Req() req: any, @Param('id') id: string, @Body() dto: UpdatePageDto) {
-    return this.pagesService.update(id, req.user.userId, dto);
+  async update(
+    @Req() req: ReqType,
+    @Param('id') id: string,
+    @Body() dto: UpdatePageDto,
+  ) {
+    return {
+      success: true,
+      data: await this.pagesService.update(id, req.user.userId, dto),
+      message: 'Page updated',
+    };
   }
 
-  // Remover página
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Req() req: any, @Param('id') id: string) {
-    return this.pagesService.remove(id, req.user.userId);
+  async remove(@Req() req: ReqType, @Param('id') id: string) {
+    return {
+      success: true,
+      data: await this.pagesService.remove(id, req.user.userId),
+      message: 'Page deleted',
+    };
   }
 
-  // Endpoint público -> usado pelo frontend tipo /:slug (igual ao seu andreitoledo.com.br)
   @Get('slug/:slug')
   findBySlug(@Param('slug') slug: string) {
-    return this.pagesService.findBySlug(slug);
+    return {
+      success: true,
+      data: this.pagesService.findBySlug(slug),
+      message: 'Page found',
+    };
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return {
+      success: true,
+      data: await this.pagesService.findOne(id),
+      message: 'Page found',
+    };
   }
 }

@@ -9,6 +9,10 @@ export class AuthController {
 
   @Post('login')
   login(@Body() dto: LoginDto) {
-    return this.authService.login(dto.email, dto.password);
+    return {
+      data: this.authService.login(dto.email, dto.password),
+      success: true,
+      message: 'User logged',
+    };
   }
 }

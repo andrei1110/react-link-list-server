@@ -9,6 +9,7 @@ import { SocialLink } from './pages/social-link.entity';
 import { PageStyle } from './pages/page-style.entity';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ConfigModule } from '@nestjs/config';
     UsersModule,
     AuthModule,
     PagesModule,
+    UploadModule,
   ],
 })
 export class AppModule {}

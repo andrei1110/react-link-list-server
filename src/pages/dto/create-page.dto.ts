@@ -3,6 +3,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUrl,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -13,7 +14,7 @@ import { SocialLinkDto } from './social-link.dto';
 export class CreatePageDto {
   @IsString()
   @IsNotEmpty()
-  slug: string; // ex: "andreitoledo"
+  slug: string;
 
   @IsString()
   @IsNotEmpty()
@@ -22,6 +23,10 @@ export class CreatePageDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsUrl()
+  avatarUrl?: string;
 
   @IsOptional()
   @ValidateNested()
