@@ -39,6 +39,15 @@ export class PagesController {
     };
   }
 
+  @Get('slug/:slug')
+  async findBySlug(@Param('slug') slug: string) {
+    return {
+      success: true,
+      data: await this.pagesService.findBySlug(slug),
+      message: 'Page found',
+    };
+  }
+
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
@@ -60,15 +69,6 @@ export class PagesController {
       success: true,
       data: await this.pagesService.remove(id, req.user.userId),
       message: 'Page deleted',
-    };
-  }
-
-  @Get('slug/:slug')
-  findBySlug(@Param('slug') slug: string) {
-    return {
-      success: true,
-      data: this.pagesService.findBySlug(slug),
-      message: 'Page found',
     };
   }
 

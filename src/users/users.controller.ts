@@ -1,9 +1,18 @@
 // src/users/users.controller.ts
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import type { Req as ReqType } from 'src/types/req';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -15,11 +24,27 @@ export class UsersController {
     const { passwordHash: _hash, ...rest } = user;
     return { data: rest, succes: true, message: 'User created' };
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch()
+  async update(@Req() req: ReqType, @Body() dto: UpdateUserDto) {
+    const updated = await this.usersService.update(req.user.userId, dto);
+
+    return {
+      success: true,
+      data: updated,
+      message: 'User updated',
+    };
+  }
+
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  getMe(@Req() req: ReqType) {
+  async getMe(@Req() req: ReqType) {
+    const { name, email, country, city } = await this.usersService.getMe(
+      req.user.userId,
+    );
     return {
-      data: req.user,
+      data: { name, email, country, city },
       success: true,
       message: 'Valid user',
     };

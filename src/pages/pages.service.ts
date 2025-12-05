@@ -54,7 +54,6 @@ export class PagesService {
       throw new NotFoundException('Página não encontrada');
     }
 
-    // ordenar links por ordem
     if (page.links) {
       page.links = page.links.sort((a, b) => a.order - b.order);
     }
@@ -122,7 +121,6 @@ export class PagesService {
       throw new NotFoundException('Página não encontrada');
     }
 
-    // ordenar links por ordem
     if (page.links) {
       page.links = page.links.sort((a, b) => a.order - b.order);
     }
