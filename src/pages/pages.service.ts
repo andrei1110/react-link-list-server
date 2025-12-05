@@ -8,6 +8,7 @@ import { PageStyle } from './page-style.entity';
 import { CreatePageDto } from './dto/create-page.dto';
 import { UpdatePageDto } from './dto/update-page.dto';
 import { UsersService } from '../users/users.service';
+import { normalizeUrl } from 'src/utils/normalize-url';
 
 @Injectable()
 export class PagesService {
@@ -21,15 +22,39 @@ export class PagesService {
 
   async create(userId: string, dto: CreatePageDto) {
     const user = await this.usersService.findById(userId);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
     const style = dto.style
       ? this.styleRepo.create(dto.style)
       : this.styleRepo.create({});
-    const links = (dto.links || []).map((l) => this.linkRepo.create(l));
-    const socialLinks = (dto.socialLinks || []).map((s) =>
-      this.socialRepo.create(s),
-    );
+
+    const links = (dto.links || []).flatMap((l) => {
+      try {
+        return [
+          this.linkRepo.create({
+            ...l,
+            url: normalizeUrl(l.url),
+          }),
+        ];
+      } catch {
+        return [];
+      }
+    });
+
+    const socialLinks = (dto.socialLinks || []).flatMap((s) => {
+      try {
+        return [
+          this.socialRepo.create({
+            ...s,
+            url: normalizeUrl(s.url),
+          }),
+        ];
+      } catch {
+        return [];
+      }
+    });
 
     const page = this.pageRepo.create({
       slug: dto.slug,
