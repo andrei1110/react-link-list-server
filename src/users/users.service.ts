@@ -9,15 +9,17 @@ import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private repo: Repository<User>,
+    private jwt: JwtService,
   ) {}
 
-  async create(dto: CreateUserDto): Promise<User> {
+  async create(dto: CreateUserDto): Promise<{ access_token: string }> {
     const existing = await this.repo.findOne({ where: { email: dto.email } });
     if (existing) {
       throw new ConflictException('Email already in use');
@@ -25,7 +27,7 @@ export class UsersService {
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
-    const user = this.repo.create({
+    let user = this.repo.create({
       name: dto.name,
       country: dto.country,
       city: dto.city,
@@ -33,7 +35,15 @@ export class UsersService {
       passwordHash,
     });
 
-    return this.repo.save(user);
+    user = await this.repo.save(user);
+
+    const payload = { sub: user.id, email: user.email };
+
+    const access_token = this.jwt.sign(payload);
+
+    return {
+      access_token,
+    };
   }
 
   findByEmail(email: string) {

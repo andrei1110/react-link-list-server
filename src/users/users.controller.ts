@@ -21,8 +21,7 @@ export class UsersController {
   @Post()
   async register(@Body() dto: CreateUserDto) {
     const user = await this.usersService.create(dto);
-    const { passwordHash: _hash, ...rest } = user;
-    return { data: rest, succes: true, message: 'User created' };
+    return { data: user, success: true, message: 'User created' };
   }
 
   @UseGuards(JwtAuthGuard)
