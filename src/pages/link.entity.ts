@@ -7,13 +7,13 @@ export class Link {
   id: string;
 
   @Column()
-  label: string; // texto do botão
+  label: string;
 
   @Column()
   url: string;
 
   @Column({ nullable: true })
-  icon: string; // nome do ícone (ex: "youtube", "github")
+  icon: string;
 
   @Column({ default: 0 })
   order: number;

@@ -93,7 +93,7 @@ export class PagesService {
   async findAllByUser(userId: string) {
     return this.pageRepo.find({
       where: { user: { id: userId } },
-      relations: ['style'],
+      relations: ['style', 'links'],
     });
   }
 
