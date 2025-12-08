@@ -10,6 +10,7 @@ import { PageStyle } from './pages/page-style.entity';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { UploadModule } from './upload/upload.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { UploadModule } from './upload/upload.module';
     AuthModule,
     PagesModule,
     UploadModule,
+    HealthModule,
   ],
 })
 export class AppModule {}
